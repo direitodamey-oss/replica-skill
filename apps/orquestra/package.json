@@ -1,0 +1,15 @@
+{
+  "name": "orquestra",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Orquestra: todos os modelos Claude, especialistas e biblioteca de prompts em uma só tela.",
+  "type": "module",
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test test/*.test.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.133.0"
+  }
+}

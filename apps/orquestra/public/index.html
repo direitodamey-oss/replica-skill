@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Orquestra</title>
+  <meta name="description" content="Todos os modelos Claude, especialistas e biblioteca de prompts em uma só tela.">
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/styles.css">
+  <script>
+    try {
+      const t = JSON.parse(localStorage.getItem('orquestra:theme') || 'null');
+      if (t) document.documentElement.dataset.theme = t;
+    } catch {}
+  </script>
+</head>
+<body>
+  <a class="skip" href="#prompt">Pular para a caixa de mensagem</a>
+  <div class="app">
+    <aside id="sidebar" class="sidebar" aria-label="Navegação">
+      <div class="brand">
+        <img src="/icon.svg" alt="" width="28" height="28">
+        <span>Orquestra</span>
+        <button class="icon-btn only-mobile" id="close-sidebar" aria-label="Fechar menu">✕</button>
+      </div>
+      <button class="btn primary block" id="new-chat">＋ Nova conversa</button>
+      <nav class="side-nav">
+        <button class="side-link" data-open="experts">🧩 Especialistas</button>
+        <button class="side-link" data-open="prompts">📚 Biblioteca de prompts</button>
+        <button class="side-link" data-open="contexts">🗂️ Contextos <span class="badge" id="ctx-count" hidden></span></button>
+      </nav>
+      <label class="search">
+        <span class="sr-only">Buscar conversas</span>
+        <input id="search" type="search" placeholder="Buscar conversas" autocomplete="off">
+      </label>
+      <div id="history" class="history" role="list"></div>
+      <div class="side-foot">
+        <button class="side-link" data-open="data">⇅ Importar e exportar</button>
+        <button class="side-link" id="theme-btn">◐ Tema</button>
+      </div>
+    </aside>
+    <div class="scrim" id="scrim" hidden></div>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="icon-btn only-mobile" id="open-sidebar" aria-label="Abrir menu">☰</button>
+        <div class="picker">
+          <button class="model-btn" id="model-btn" aria-haspopup="listbox" aria-expanded="false">
+            <span id="model-label">Claude Opus 5.5</span> <span aria-hidden="true">▾</span>
+          </button>
+          <ul class="popover" id="model-list" role="listbox" hidden></ul>
+        </div>
+        <div id="expert-chip" class="expert-chip" hidden></div>
+        <div class="spacer"></div>
+        <span id="demo-flag" class="demo-flag" hidden title="Defina ANTHROPIC_API_KEY no servidor para respostas reais">modo demonstração</span>
+        <button class="icon-btn" id="export-chat" aria-label="Baixar conversa em Markdown" title="Baixar conversa">⤓</button>
+      </header>
+
+      <section id="messages" class="messages" aria-live="polite"></section>
+
+      <form id="composer" class="composer">
+        <div id="slash-menu" class="slash-menu" role="listbox" hidden></div>
+        <div id="attachments" class="attachments"></div>
+        <div class="composer-box">
+          <label for="prompt" class="sr-only">Mensagem</label>
+          <textarea id="prompt" rows="1" placeholder="Pergunte algo ou digite / para comandos"></textarea>
+          <div class="composer-bar">
+            <div class="plus-wrap">
+              <button type="button" class="icon-btn" id="plus-btn" aria-label="Mais opções" aria-expanded="false">＋</button>
+              <div class="popover up" id="plus-menu" hidden>
+                <button type="button" data-action="attach">📎 Anexar arquivos</button>
+                <button type="button" data-open="prompts">📚 Usar um prompt</button>
+                <button type="button" data-open="contexts">🗂️ Contextos</button>
+                <button type="button" data-open="experts">🧩 Especialistas</button>
+              </div>
+            </div>
+            <button type="button" class="chip" id="toggle-web" aria-pressed="false" aria-label="Web">🌐<span class="chip-label"> Web</span></button>
+            <button type="button" class="chip" id="toggle-think" aria-pressed="false" aria-label="Raciocínio">🧠<span class="chip-label"> Raciocínio</span></button>
+            <button type="button" class="chip" id="toggle-image" aria-pressed="false" aria-label="Imagem">🎨<span class="chip-label"> Imagem</span></button>
+            <select id="ratio" class="chip-select" aria-label="Formato da imagem" hidden>
+              <option value="1:1">1:1</option>
+              <option value="16:9">16:9</option>
+              <option value="9:16">9:16</option>
+              <option value="4:3">4:3</option>
+            </select>
+            <div class="spacer"></div>
+            <button type="button" class="icon-btn" id="mic-btn" aria-label="Ditar por voz" aria-pressed="false">🎙️</button>
+            <button type="submit" class="send" id="send-btn" aria-label="Enviar">↑</button>
+          </div>
+        </div>
+        <input type="file" id="file-input" multiple hidden
+          accept=".pdf,.png,.jpg,.jpeg,.gif,.webp,.txt,.md,.csv,.json,.html,.xml,.js,.ts,.py,.sql,.yaml,.yml,.docx">
+        <p class="fine">A IA pode errar. Confira informações importantes.</p>
+      </form>
+    </main>
+  </div>
+
+  <dialog id="dlg-experts" class="dialog wide" aria-labelledby="experts-title">
+    <header class="dlg-head">
+      <h1 id="experts-title">Especialistas</h1>
+      <button class="icon-btn" data-close aria-label="Fechar">✕</button>
+    </header>
+    <div class="dlg-tools">
+      <div class="tabs" role="tablist">
+        <button role="tab" data-tab="community" aria-selected="true">Descobrir</button>
+        <button role="tab" data-tab="personal" aria-selected="false">Meus</button>
+        <button role="tab" data-tab="curated" aria-selected="false">Curadoria</button>
+      </div>
+      <input type="search" id="expert-search" placeholder="Buscar especialistas" aria-label="Buscar especialistas">
+      <button class="btn primary" id="new-expert">＋ Criar</button>
+    </div>
+    <div id="expert-grid" class="grid"></div>
+  </dialog>
+
+  <dialog id="dlg-expert-edit" class="dialog" aria-labelledby="edit-title">
+    <form method="dialog" id="expert-form" class="form">
+      <header class="dlg-head">
+        <h1 id="edit-title">Novo especialista</h1>
+        <button type="button" class="icon-btn" data-close aria-label="Fechar">✕</button>
+      </header>
+      <div class="row">
+        <label class="f-emoji">Ícone<input name="emoji" maxlength="4" value="🤖" required></label>
+        <label class="grow">Nome<input name="name" maxlength="60" required placeholder="Ex.: Consultor de Vendas"></label>
+      </div>
+      <label>Descrição<input name="description" maxlength="140" placeholder="O que ele faz, em uma frase"></label>
+      <label>Instruções
+        <textarea name="instructions" rows="7" required placeholder="Quem ele é, como deve responder, o que evitar. Quanto mais específico, melhor."></textarea>
+      </label>
+      <label>Modelo<select name="model" id="expert-model"></select></label>
+      <label>Sugestões de início <small>(uma por linha)</small>
+        <textarea name="starters" rows="3" placeholder="Analise meu funil de vendas&#10;Crie um roteiro de ligação"></textarea>
+      </label>
+      <fieldset class="files-field">
+        <legend>Base de conhecimento <small>(PDF, imagens ou texto)</small></legend>
+        <div id="expert-files" class="attachments"></div>
+        <button type="button" class="btn" id="expert-add-file">📎 Adicionar arquivos</button>
+        <input type="file" id="expert-file-input" multiple hidden accept=".pdf,.png,.jpg,.jpeg,.gif,.webp,.txt,.md,.csv,.json,.docx">
+      </fieldset>
+      <footer class="dlg-foot">
+        <button type="button" class="btn danger" id="delete-expert" hidden>Excluir</button>
+        <div class="spacer"></div>
+        <button type="button" class="btn" data-close>Cancelar</button>
+        <button type="submit" class="btn primary">Salvar</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <dialog id="dlg-prompts" class="dialog wide" aria-labelledby="prompts-title">
+    <header class="dlg-head">
+      <h1 id="prompts-title">Biblioteca de prompts</h1>
+      <button class="icon-btn" data-close aria-label="Fechar">✕</button>
+    </header>
+    <div class="dlg-tools">
+      <div class="tabs" id="prompt-cats" role="tablist"></div>
+      <input type="search" id="prompt-search" placeholder="Buscar prompts" aria-label="Buscar prompts">
+      <button class="btn primary" id="new-prompt">＋ Salvar prompt</button>
+    </div>
+    <div id="prompt-list" class="list"></div>
+  </dialog>
+
+  <dialog id="dlg-prompt-edit" class="dialog" aria-labelledby="prompt-edit-title">
+    <form method="dialog" id="prompt-form" class="form">
+      <header class="dlg-head">
+        <h1 id="prompt-edit-title">Salvar prompt</h1>
+        <button type="button" class="icon-btn" data-close aria-label="Fechar">✕</button>
+      </header>
+      <label>Título<input name="title" maxlength="60" required></label>
+      <label>Categoria<input name="category" maxlength="30" value="Meus prompts" required></label>
+      <label>Prompt <small>(use [colchetes] para os campos a preencher)</small><textarea name="body" rows="7" required></textarea></label>
+      <footer class="dlg-foot">
+        <button type="button" class="btn danger" id="delete-prompt" hidden>Excluir</button>
+        <div class="spacer"></div>
+        <button type="button" class="btn" data-close>Cancelar</button>
+        <button type="submit" class="btn primary">Salvar</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <dialog id="dlg-contexts" class="dialog" aria-labelledby="contexts-title">
+    <header class="dlg-head">
+      <h1 id="contexts-title">Contextos</h1>
+      <button class="icon-btn" data-close aria-label="Fechar">✕</button>
+    </header>
+    <p class="muted">Informações que a IA deve sempre considerar: sobre você, sua empresa, seu público. Os contextos ligados entram em todas as conversas.</p>
+    <div id="context-list" class="list"></div>
+    <form id="context-form" class="form">
+      <input type="hidden" name="id">
+      <label>Título<input name="title" maxlength="60" required placeholder="Ex.: Minha empresa"></label>
+      <label>Conteúdo<textarea name="body" rows="5" required placeholder="Somos uma clínica odontológica em Curitiba, público de 25 a 45 anos…"></textarea></label>
+      <footer class="dlg-foot">
+        <div class="spacer"></div>
+        <button type="reset" class="btn">Limpar</button>
+        <button type="submit" class="btn primary">Salvar contexto</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <dialog id="dlg-data" class="dialog" aria-labelledby="data-title">
+    <header class="dlg-head">
+      <h1 id="data-title">Importar e exportar</h1>
+      <button class="icon-btn" data-close aria-label="Fechar">✕</button>
+    </header>
+    <div class="stack">
+      <section>
+        <h2>Trazer conversas do ChatGPT</h2>
+        <p class="muted">No ChatGPT, vá em Configurações → Controles de dados → Exportar. Abra o .zip e escolha o arquivo <code>conversations.json</code>.</p>
+        <button class="btn" id="import-chatgpt">Escolher conversations.json</button>
+      </section>
+      <section>
+        <h2>Backup do Orquestra</h2>
+        <p class="muted">Conversas, especialistas, prompts e contextos ficam salvos só neste navegador. Faça backup para levar a outro aparelho.</p>
+        <div class="row">
+          <button class="btn" id="export-all">Baixar backup</button>
+          <button class="btn" id="import-backup">Restaurar backup</button>
+        </div>
+      </section>
+      <section>
+        <h2>Apagar tudo</h2>
+        <button class="btn danger" id="wipe">Apagar todas as conversas</button>
+      </section>
+    </div>
+    <input type="file" id="data-input" accept=".json,application/json" hidden>
+  </dialog>
+
+  <div id="toasts" class="toasts" role="status" aria-live="polite"></div>
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>

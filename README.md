@@ -113,6 +113,11 @@ people book a time with you.
     sets up production, gives you the DNS records for your domain, and ships
     it when you say go.
 
+A worked example lives in [`apps/orquestra`](apps/orquestra): a multi-model AI
+workspace (chat, custom specialists, a prompt library, file analysis, web
+search) rebuilt with the pack, with its recon map, feature matrix and a parity
+score of 82.
+
 You can also run any one on its own. `/replica-entrepreneur` on an app you
 are only thinking about cloning is a good way to find out if you should.
 

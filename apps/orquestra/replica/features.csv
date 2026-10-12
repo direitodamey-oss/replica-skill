@@ -1,0 +1,28 @@
+feature,area,priority,original,clone,notes
+Chat com respostas em streaming,chat,must,yes,yes,
+Vários modelos e troca no meio da conversa,chat,must,yes,partial,só a família Claude (Opus 5.5 / Fable 5.1 / Sonnet 5.5 / Haiku 5.5); outros fornecedores ficam para um adaptador
+Markdown com tabelas e código copiável,chat,must,yes,yes,
+Histórico de conversas com busca,histórico,must,yes,yes,salvo no navegador (IndexedDB)
+Especialistas: criar com instruções e modelo,especialistas,must,yes,yes,
+Especialistas: base de conhecimento (PDF e DOCX),especialistas,must,yes,yes,PDF vai como documento; DOCX vira texto no navegador
+Especialistas: sugestões de início,especialistas,should,yes,yes,
+Especialistas: abas Descobrir / Meus / Curadoria com busca,especialistas,must,yes,partial,Descobrir mostra exemplos locais; não há publicação entre usuários
+Especialistas: avaliação,especialistas,could,yes,partial,a nota fica só no seu navegador
+Biblioteca de prompts com categorias,prompts,must,yes,yes,
+Salvar prompts próprios,prompts,should,yes,yes,
+Contextos reutilizáveis,contextos,should,yes,yes,
+Anexar arquivos para análise (PDF imagem texto),anexos,must,yes,yes,
+Pesquisa na web com fontes,ferramentas,must,yes,yes,web_search do Claude; desligada em modelos sem suporte
+Raciocínio avançado,ferramentas,should,yes,yes,thinking adaptativo com resumo visível
+Geração de imagem com proporção,imagem,should,yes,partial,ilustrações vetoriais (SVG) desenhadas pelo Claude; sem modelos de imagem fotográfica
+Menu de comandos com /,composer,should,yes,yes,
+Ditado por voz,composer,could,yes,partial,Web Speech API; só em navegadores que a suportam
+Importar histórico do ChatGPT,importação,should,yes,yes,
+Exportar conversa,importação,could,no,yes,Markdown; mais backup completo em JSON
+Fixar e renomear conversas,histórico,could,yes,yes,
+Tema claro e escuro,interface,could,yes,yes,
+Layout mobile,interface,must,yes,yes,
+Contas e login,contas,must,yes,no,armazenamento só local nesta versão
+Planos e pagamento,contas,should,yes,no,
+Comunidade de especialistas publicados por outros usuários,especialistas,could,yes,skip,é a rede de usuários do original; não é uma funcionalidade a reconstruir
+Cursos e conteúdo educacional,conteúdo,could,yes,skip,conteúdo próprio do original

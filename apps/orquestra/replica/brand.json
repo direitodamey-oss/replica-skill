@@ -1,0 +1,6 @@
+{
+  "name": "Orquestra",
+  "avoid": ["Adapta", "Adapta ONE", "Adapta One"],
+  "domains": ["adapta.org"],
+  "colors": []
+}
